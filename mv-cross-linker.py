@@ -2,8 +2,10 @@ import pandas as pd
 import csv
 import re
 from urllib.parse import urlparse
-from io import StringIO
 import random
+import os
+import sys
+import argparse
 
 def extract_url_components(url):
     """Extract components from a URL"""
@@ -76,26 +78,25 @@ def generate_anchor_text(url, category):
     # Default
     return "View Listings"
 
-def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_links=1000):
+def generate_csv_export(sitemap_df, output_csv_path, url_patterns, max_links=1000):
     """
     Generate a cross-linking CSV based on sitemap data
     
     Args:
-        sitemap_csv_path: Path to input sitemap CSV
+        sitemap_df: DataFrame containing sitemap data
         output_csv_path: Path to save the cross-linking CSV
         url_patterns: Dictionary of URL patterns for categorizing pages
         max_links: Maximum number of links to generate
     """
-    # Read the sitemap CSV
-    df = pd.read_csv(sitemap_csv_path)
-    
     # Ensure 'Address' column exists
-    if 'Address' not in df.columns:
-        raise ValueError("CSV must contain an 'Address' column with URLs")
+    if 'Address' not in sitemap_df.columns:
+        raise ValueError("DataFrame must contain an 'Address' column with URLs")
     
     # Filter for 200 status code pages if the column exists
-    if 'Status Code' in df.columns:
-        df = df[df['Status Code'] == 200]
+    if 'Status Code' in sitemap_df.columns:
+        sitemap_df = sitemap_df[sitemap_df['Status Code'] == 200]
+    
+    print(f"Processing {len(sitemap_df)} pages with 200 status code")
     
     # Categorize all pages
     categorized_pages = {
@@ -105,7 +106,7 @@ def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_lin
         'category_plp': []
     }
     
-    for idx, row in df.iterrows():
+    for idx, row in sitemap_df.iterrows():
         url = row['Address']
         components = extract_url_components(url)
         category = categorize_page(components, url_patterns)
@@ -115,6 +116,10 @@ def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_lin
                 'url': url,
                 'components': components
             })
+    
+    # Print category counts
+    for category, pages in categorized_pages.items():
+        print(f"Found {len(pages)} {category} pages")
     
     # Define linking rules
     linking_rules = [
@@ -144,7 +149,10 @@ def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_lin
         
         # Skip if we don't have pages in either category
         if not categorized_pages[source_category] or not categorized_pages[target_category]:
+            print(f"Skipping {link_type} - missing pages in one of the categories")
             continue
+        
+        print(f"Generating {link_type} links...")
         
         # For each source page, find appropriate target pages
         for source_page in categorized_pages[source_category]:
@@ -223,6 +231,7 @@ def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_lin
                 break
     
     # Write to CSV
+    print(f"Writing {len(all_links)} links to {output_csv_path}")
     with open(output_csv_path, 'w', newline='') as csvfile:
         fieldnames = ['source_page', 'target_page', 'link_type', 'anchor_text', 'placement', 'priority', 'position']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -233,22 +242,74 @@ def generate_csv_export(sitemap_csv_path, output_csv_path, url_patterns, max_lin
     
     return len(all_links)
 
-# Example usage
+# Example of directly loading CSV content as string (for uploads in web app)
+def process_csv_content(csv_content, output_path, url_patterns, max_links=1000):
+    """Process CSV content directly from a string"""
+    import io
+    
+    # Use pandas to read the CSV content from a string
+    df = pd.read_csv(io.StringIO(csv_content))
+    
+    # Generate the cross-linking CSV
+    return generate_csv_export(df, output_path, url_patterns, max_links)
+
 if __name__ == "__main__":
-    # Define URL patterns for a real estate website
-    url_patterns = {
-        'pdp': r'[a-z]{2}/[a-z-]+/\d+',  # e.g., ca/los-angeles/123456-address
-        'city_plp': r'[a-z]{2}/[a-z-]+$',  # e.g., ca/los-angeles
-        'state_plp': r'^[a-z]{2}$',  # e.g., ca
-        'category_plp': r'(coworking|metro-area)/'  # e.g., coworking/
-    }
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='Generate cross-linking CSV from sitemap data')
+    parser.add_argument('--input', '-i', help='Input sitemap CSV file path', default='sitemaps_all.csv')
+    parser.add_argument('--output', '-o', help='Output cross-linking CSV file path', default='cross_linking_plan.csv')
+    parser.add_argument('--max-links', '-m', type=int, help='Maximum number of links to generate', default=1000)
+    parser.add_argument('--site-type', '-t', help='Site type (real_estate, ecommerce, blog)', default='real_estate')
+    args = parser.parse_args()
+    
+    # Make sure input file exists
+    if not os.path.isfile(args.input):
+        print(f"Error: Input file '{args.input}' not found.")
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Files in directory: {os.listdir('.')}")
+        sys.exit(1)
+    
+    # Define URL patterns based on site type
+    if args.site_type == 'real_estate':
+        url_patterns = {
+            'pdp': r'[a-z]{2}/[a-z-]+/\d+',  # e.g., ca/los-angeles/123456-address
+            'city_plp': r'[a-z]{2}/[a-z-]+$',  # e.g., ca/los-angeles
+            'state_plp': r'^[a-z]{2}$',  # e.g., ca
+            'category_plp': r'(coworking|metro-area)/'  # e.g., coworking/
+        }
+    elif args.site_type == 'ecommerce':
+        url_patterns = {
+            'pdp': r'product/[a-z0-9-]+',  # e.g., product/blue-t-shirt
+            'city_plp': r'category/[a-z-]+$',  # e.g., category/t-shirts
+            'state_plp': r'^shop$',  # e.g., shop
+            'category_plp': r'collections?/'  # e.g., collection/
+        }
+    elif args.site_type == 'blog':
+        url_patterns = {
+            'pdp': r'blog/\d{4}/\d{2}/[a-z0-9-]+',  # e.g., blog/2023/01/post-title
+            'city_plp': r'blog/\d{4}/\d{2}$',  # e.g., blog/2023/01
+            'state_plp': r'^blog$',  # e.g., blog
+            'category_plp': r'category/'  # e.g., category/marketing
+        }
+    else:
+        url_patterns = {
+            'pdp': r'/[a-z0-9-]+/[a-z0-9-]+/[a-z0-9-]+',  # Most specific page level
+            'city_plp': r'/[a-z0-9-]+/[a-z0-9-]+$',  # Second level pages
+            'state_plp': r'^/[a-z0-9-]+$',  # Top level pages
+            'category_plp': r'/categories?/'  # Category pages
+        }
+    
+    # Read sitemap CSV
+    print(f"Reading sitemap from {args.input}")
+    df = pd.read_csv(args.input)
     
     # Generate cross-linking CSV
     num_links = generate_csv_export(
-        'sitemaps_all.csv',  # Input sitemap CSV
-        'cross_linking_plan.csv',  # Output CSV
+        df,
+        args.output,
         url_patterns,
-        max_links=1000
+        max_links=args.max_links
     )
     
-    print(f"Generated {num_links} cross-linking recommendations")
+    print(f"Successfully generated {num_links} cross-linking recommendations")
+    print(f"Output saved to {args.output}")
