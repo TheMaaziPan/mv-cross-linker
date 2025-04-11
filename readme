@@ -1,0 +1,75 @@
+# Cross-Linking Generator App
+
+A Streamlit application that generates comprehensive cross-linking strategies for websites based on sitemap data.
+
+## Features
+
+- Upload sitemap CSV files to analyze site structure
+- Configure URL patterns to identify different page types (PDPs, PLPs, etc.)
+- Generate cross-linking recommendations based on configurable rules
+- Supports different website types (E-commerce, Real Estate, Blog/Content, Local Business)
+- Provides downloadable cross-linking plan as CSV
+- Includes anchor text suggestions and placement recommendations
+- Visualizes cross-linking statistics
+
+## Installation
+
+1. Clone this repository:
+```bash
+git clone https://github.com/yourusername/cross-linking-generator.git
+cd cross-linking-generator
+```
+
+2. Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the Streamlit app:
+```bash
+streamlit run cross_linking_app.py
+```
+
+## Usage
+
+1. **Upload sitemap CSV**: Start by uploading a CSV export of your website's sitemap. At minimum, the CSV should include:
+   - `Address` column with the full URLs
+   - Ideally, include `Status Code` to filter out non-200 pages
+
+2. **Configure URL patterns**: Select a website type template or customize URL patterns to identify:
+   - Product/Detail Pages (PDPs)
+   - Category/Listing Pages (PLPs)
+   - Different levels of your site hierarchy
+
+3. **Generate cross-linking plan**: Click the "Generate Cross-linking Plan" button to create recommendations based on the configured patterns and rules.
+
+4. **Download and implement**: Download the complete cross-linking plan as a CSV and implement the links according to the suggested placements and priorities.
+
+## CSV Format
+
+Your input CSV should include at least the following columns:
+- `Address`: Full URL of each page (required)
+- `Status Code`: HTTP status code (recommended)
+- `Content Type`: Type of content (optional)
+- `Indexability`: Whether the page is indexable (optional)
+
+## Example
+
+An e-commerce site might have URL patterns like:
+- PDPs: `product/[product-name]`
+- Category PLPs: `category/[category-name]`
+- Subcategory PLPs: `category/[category]/[subcategory]`
+
+The app will identify these patterns and generate appropriate cross-links between them.
+
+## Advanced Customization
+
+You can customize:
+- URL identification patterns using regular expressions
+- Linking rules between different page types
+- Maximum number of links to generate
+- Anchor text and placement suggestion approaches
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
