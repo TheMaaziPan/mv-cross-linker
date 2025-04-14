@@ -11,7 +11,7 @@ import traceback
 
 # Set page configuration
 st.set_page_config(
-    page_title="Cross-linking Generator",
+    page_title="MV Cross-linking Generator",
     page_icon="🔗",
     layout="wide",
     initial_sidebar_state="expanded"
