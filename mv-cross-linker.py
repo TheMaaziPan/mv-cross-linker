@@ -289,7 +289,7 @@ def generate_cross_links(df, url_patterns, max_links=1000):
 
 def main():
     try:
-        st.title("🔗 Website Cross-linking Generator")
+        st.title("🔗 MV Cross-linking Generator")
         
         st.markdown("""
         This app generates cross-linking recommendations for your website based on a sitemap export CSV.
