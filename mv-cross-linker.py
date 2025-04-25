@@ -30,33 +30,266 @@ except LookupError:
 
 # Set page configuration
 st.set_page_config(
-    page_title="MV Octopus Cross-linker",
-    page_icon="🔗",
+    page_title="SpiderWeb Cross-linker",
+    page_icon="🕸️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Add custom CSS
+# Add custom CSS to match MediaVision styling
 st.markdown("""
 <style>
+    /* Main color scheme */
+    :root {
+        --mv-dark-blue: #0A1921;
+        --mv-medium-blue: #1E3342;
+        --mv-highlight-green: #C4F500;
+        --mv-text-color: #333333;
+        --mv-light-gray: #F5F5F5;
+        --mv-border-color: #EEEEEE;
+    }
+    
+    /* Overall app styling */
+    .reportview-container, .main, .block-container {
+        background-color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
     .main .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
     }
-    .sidebar .sidebar-content {
-        background-color: #f5f5f5;
+    
+    /* Header styling */
+    .main h1, .main h2, .sidebar h2 {
+        color: var(--mv-dark-blue);
+        font-weight: 500;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .stProgress > div > div {
-        background-color: #4CAF50;
+    
+    .main h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
     }
-    .stDownloadButton button {
-        background-color: #4CAF50;
+    
+    .main h2 {
+        font-size: 22px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+    }
+    
+    .main h3 {
+        font-size: 18px;
+        color: var(--mv-medium-blue);
+        font-weight: 500;
+        margin-top: 25px;
+        margin-bottom: 10px;
+    }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: var(--mv-dark-blue);
+    }
+    
+    [data-testid="stSidebar"] .sidebar-content {
+        background-color: var(--mv-dark-blue);
+    }
+
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, 
+    [data-testid="stSidebar"] .stSubheader,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] div {
         color: white;
     }
-    h1, h2, h3 {
-        color: #2C3E50;
+
+    [data-testid="stSidebar"] hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tab styling to match the horizontal menu */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+        background-color: white;
+        border-bottom: 1px solid var(--mv-border-color);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 45px;
+        padding: 0px 20px;
+        border-radius: 30px;
+        color: var(--mv-dark-blue);
+        font-weight: 400;
+        background-color: white;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: var(--mv-highlight-green);
+        color: var(--mv-dark-blue);
+        font-weight: 500;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background-color: var(--mv-dark-blue);
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: 400;
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .stButton > button:hover {
+        background-color: var(--mv-medium-blue);
+        border: none;
+    }
+    
+    .stDownloadButton > button {
+        background-color: var(--mv-dark-blue);
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: 400;
+        border: none;
+    }
+    
+    .stDownloadButton > button:hover {
+        background-color: var(--mv-medium-blue);
+        border: none;
+    }
+    
+    /* Radio and checkbox styling */
+    .stRadio > div {
+        padding: 10px 0;
+    }
+    
+    .stRadio label {
+        color: var(--mv-dark-blue);
+        font-weight: 400;
+    }
+    
+    .stCheckbox label {
+        color: var(--mv-dark-blue);
+        font-weight: 400;
+    }
+    
+    /* Text input and text area styling */
+    .stTextInput > div > div > input {
+        border-radius: 5px;
+        border: 1px solid var(--mv-border-color);
+    }
+    
+    .stTextArea > div > div > textarea {
+        border-radius: 5px;
+        border: 1px solid var(--mv-border-color);
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        font-weight: 500;
+        color: var(--mv-medium-blue);
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div {
+        background-color: var(--mv-highlight-green);
+    }
+    
+    /* Dataframe and tables */
+    .dataframe {
+        border: 1px solid var(--mv-border-color);
+    }
+    
+    .dataframe th {
+        background-color: var(--mv-dark-blue);
+        color: white;
+        font-weight: 400;
+        padding: 8px;
+    }
+    
+    .dataframe td {
+        padding: 8px;
+    }
+    
+    .dataframe tr:nth-child(even) {
+        background-color: var(--mv-light-gray);
+    }
+    
+    /* Custom navigation tabs like in your example */
+    .nav-tab-container {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    
+    .nav-tab {
+        padding: 10px 25px;
+        background-color: white;
+        color: var(--mv-dark-blue);
+        border-radius: 30px;
+        margin-right: 5px;
+        cursor: pointer;
+        font-weight: 400;
+        text-decoration: none;
+        text-align: center;
+    }
+    
+    .nav-tab.active {
+        background-color: var(--mv-highlight-green);
+        color: var(--mv-dark-blue);
+        font-weight: 500;
+    }
+    
+    /* Add New Client button style */
+    .add-new-button {
+        background-color: var(--mv-dark-blue);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        text-align: center;
+        display: inline-block;
+        margin-top: 15px;
+        cursor: pointer;
+        font-weight: 400;
+    }
+    
+    /* Custom header styling for the MediaVision look */
+    .mv-header {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+    }
+    
+    .mv-logo {
+        font-weight: bold;
+        font-size: 24px;
+        color: var(--mv-dark-blue);
+    }
+    
+    .mv-logo span {
+        color: var(--mv-dark-blue);
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Function to create custom navigation tabs similar to the example
+def custom_navigation_tabs(tabs, active_tab=0):
+    html_tabs = '<div class="nav-tab-container">'
+    
+    for i, tab in enumerate(tabs):
+        if i == active_tab:
+            html_tabs += f'<div class="nav-tab active">{tab}</div>'
+        else:
+            html_tabs += f'<div class="nav-tab">{tab}</div>'
+    
+    html_tabs += '</div>'
+    
+    st.markdown(html_tabs, unsafe_allow_html=True)
 
 # Helper functions
 def extract_url_components(url):
@@ -548,11 +781,14 @@ def generate_cross_links(df, url_patterns, max_links=1000, use_content_similarit
                     anchor_text = generate_varied_anchor_text(
                         target_url, 
                         target_category,
+anchor_text = generate_varied_anchor_text(
+                        target_url, 
+                        target_category,
                         title,
                         content_type
                     )
                     
-                    # Calculate relevance score (if enabled)
+                    # Calculate relevance score
                     relevance_score = 0.5  # Default medium relevance
                     
                     # Create link
@@ -590,15 +826,27 @@ def main():
         if 'page' not in st.session_state:
             st.session_state.page = 'main'
         
-        st.title("🔗 MV Octopus Cross-linker")
-        
+        # Custom header with MediaVision-style logo
         st.markdown("""
-        This app generates cross-linking recommendations for your website based on sitemap data.
-        Upload a CSV sitemap export, provide an XML sitemap URL, or enter URLs manually to create a comprehensive cross-linking plan.
-        """)
+        <div class="mv-header">
+            <div class="mv-logo">
+                <span>🕸️ SpiderWeb</span> Cross-linker
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Main title 
+        st.title("Internal Link Builder")
+        
+        # Custom navigation tabs
+        active_tab = 0
+        if 'active_tab' in st.session_state:
+            active_tab = st.session_state.active_tab
+        
+        custom_navigation_tabs(["Site Configuration", "Link Generation"], active_tab)
         
         with st.sidebar:
-            st.header("Configuration")
+            st.header("SpiderWeb Cross-linker")
             
             st.subheader("Step 1: Choose Data Source")
             data_source = st.radio(
@@ -662,8 +910,7 @@ def main():
                 use_content_similarity = st.checkbox("Enable content similarity analysis (experimental)", value=False)
                 balance_links = st.checkbox("Balance bidirectional links", value=True)
                 
-                # If XML sitemap is selected and fetch titles is enable
-# If XML sitemap is selected and fetch titles is enabled
+                # If XML sitemap is selected and fetch titles is enabled
                 if data_source == "XML Sitemap URL" and fetch_titles:
                     max_title_fetches = st.slider("Maximum pages to fetch titles for", 10, 200, 50)
         
@@ -764,67 +1011,69 @@ def main():
             with tab2:
                 st.subheader("Generate Cross-linking Plan")
                 
-                if st.button("Generate Cross-linking Plan"):
-                    try:
-                        # Generate links
-                        links = generate_cross_links(
-                            df, 
-                            url_patterns, 
-                            max_links=max_links, 
-                            use_content_similarity=use_content_similarity,
-                            fetch_titles=(data_source != "XML Sitemap URL" or not fetch_titles)
-                        )
-                        
-                        if not links:
-                            st.warning("No links were generated. Check your URL patterns and make sure they match your data.")
-                            st.stop()
-                        
-                        # Convert links to DataFrame
-                        links_df = pd.DataFrame(links)
-                        
-                        # Apply link balancing if enabled
-                        if balance_links:
-                            with st.spinner("Balancing bidirectional links..."):
-                                # Identify pages with too many outgoing links
-                                outgoing_counts = links_df['source_page'].value_counts()
-                                incoming_counts = links_df['target_page'].value_counts()
-                                
-                                # Find pages with imbalanced links (many outgoing, few incoming)
-                                imbalanced_pages = []
-                                for page, outgoing in outgoing_counts.items():
-                                    incoming = incoming_counts.get(page, 0)
-                                    if outgoing > incoming * 3 and outgoing > 5:  # Arbitrary threshold
-                                        imbalanced_pages.append(page)
-                                
-                                if imbalanced_pages:
-                                    st.info(f"Found {len(imbalanced_pages)} pages with imbalanced links. Adjusting link distribution...")
+                generate_col1, generate_col2 = st.columns([2, 1])
+                with generate_col1:
+                    if st.button("Generate Cross-linking Plan", key="generate_plan"):
+                        try:
+                            # Generate links
+                            links = generate_cross_links(
+                                df, 
+                                url_patterns, 
+                                max_links=max_links, 
+                                use_content_similarity=use_content_similarity,
+                                fetch_titles=(data_source != "XML Sitemap URL" or not fetch_titles)
+                            )
+                            
+                            if not links:
+                                st.warning("No links were generated. Check your URL patterns and make sure they match your data.")
+                                st.stop()
+                            
+                            # Convert links to DataFrame
+                            links_df = pd.DataFrame(links)
+                            
+                            # Apply link balancing if enabled
+                            if balance_links:
+                                with st.spinner("Balancing bidirectional links..."):
+                                    # Identify pages with too many outgoing links
+                                    outgoing_counts = links_df['source_page'].value_counts()
+                                    incoming_counts = links_df['target_page'].value_counts()
                                     
-                                    # Reduce outgoing links from imbalanced pages
-                                    for page in imbalanced_pages:
-                                        # Keep high priority links, reduce lower priority ones
-                                        page_links = links_df[links_df['source_page'] == page]
-                                        low_priority_links = page_links[page_links['priority'] == 'low']
+                                    # Find pages with imbalanced links (many outgoing, few incoming)
+                                    imbalanced_pages = []
+                                    for page, outgoing in outgoing_counts.items():
+                                        incoming = incoming_counts.get(page, 0)
+                                        if outgoing > incoming * 3 and outgoing > 5:  # Arbitrary threshold
+                                            imbalanced_pages.append(page)
+                                    
+                                    if imbalanced_pages:
+                                        st.info(f"Found {len(imbalanced_pages)} pages with imbalanced links. Adjusting link distribution...")
                                         
-                                        if len(low_priority_links) > 0:
-                                            # Remove some low priority links
-                                            links_to_remove = low_priority_links.sample(min(len(low_priority_links), int(outgoing_counts[page] * 0.3)))
-                                            links_df = links_df.drop(links_to_remove.index)
-                        
-                        # Store links in session state for access in the next tab
-                        st.session_state['links_df'] = links_df
-                        
-                        # Display results
-                        st.success(f"Successfully generated {len(links_df)} cross-linking recommendations")
-                        
-                        # Show sample of links
-                        st.dataframe(links_df.head(10))
-                        
-                        # Prompt to continue to analysis tab
-                        st.info("Continue to the 'Analysis & Export' tab to explore the results and download your cross-linking plan.")
-                        
-                    except Exception as e:
-                        st.error(f"Error generating cross-links: {e}")
-                        st.code(traceback.format_exc())
+                                        # Reduce outgoing links from imbalanced pages
+                                        for page in imbalanced_pages:
+                                            # Keep high priority links, reduce lower priority ones
+                                            page_links = links_df[links_df['source_page'] == page]
+                                            low_priority_links = page_links[page_links['priority'] == 'low']
+                                            
+                                            if len(low_priority_links) > 0:
+                                                # Remove some low priority links
+                                                links_to_remove = low_priority_links.sample(min(len(low_priority_links), int(outgoing_counts[page] * 0.3)))
+                                                links_df = links_df.drop(links_to_remove.index)
+                            
+                            # Store links in session state for access in the next tab
+                            st.session_state['links_df'] = links_df
+                            
+                            # Display results
+                            st.success(f"Successfully generated {len(links_df)} cross-linking recommendations")
+                            
+                            # Show sample of links
+                            st.dataframe(links_df.head(10))
+                            
+                            # Prompt to continue to analysis tab
+                            st.info("Continue to the 'Analysis & Export' tab to explore the results and download your cross-linking plan.")
+                            
+                        except Exception as e:
+                            st.error(f"Error generating cross-links: {e}")
+                            st.code(traceback.format_exc())
             
             with tab3:
                 st.subheader("Analysis & Export")
@@ -854,7 +1103,7 @@ def main():
                         top_targets = links_df['target_page'].value_counts().head(5)
                         st.write("**Top Target Pages:**")
                         for page, count in top_targets.items():
-                            st.write(f"- {os.path.basename(page)}: {count} links")
+                            st.write(f"- {os.path.basename(page) if '/' in page else page}: {count} links")
                     
                     # Link types breakdown
                     if 'link_type' in links_df.columns:
@@ -905,7 +1154,7 @@ def main():
                             # Add formats
                             header_format = workbook.add_format({
                                 'bold': True,
-                                'bg_color': '#4CAF50',
+                                'bg_color': '#0A1921',  # MediaVision dark blue
                                 'color': 'white',
                                 'border': 1
                             })
@@ -928,32 +1177,77 @@ def main():
                             key='download-excel'
                         )
                     else:  # HTML Report
-                        # Create HTML report
+                        # Create HTML report with MediaVision styling
                         html_buffer = io.StringIO()
                         html_buffer.write(f"""
                         <!DOCTYPE html>
                         <html>
                         <head>
-                            <title>Cross-linking Plan</title>
+                            <title>SpiderWeb Cross-linking Plan</title>
                             <style>
-                                body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                                h1, h2 {{ color: #2C3E50; }}
+                                :root {{
+                                    --mv-dark-blue: #0A1921;
+                                    --mv-medium-blue: #1E3342;
+                                    --mv-highlight-green: #C4F500;
+                                    --mv-text-color: #333333;
+                                    --mv-light-gray: #F5F5F5;
+                                    --mv-border-color: #EEEEEE;
+                                }}
+                                body {{ 
+                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                                    margin: 20px; 
+                                    color: var(--mv-text-color);
+                                }}
+                                h1, h2 {{ color: var(--mv-dark-blue); }}
                                 table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
-                                th {{ background-color: #4CAF50; color: white; text-align: left; padding: 8px; }}
-                                td {{ border: 1px solid #ddd; padding: 8px; }}
-                                tr:nth-child(even) {{ background-color: #f2f2f2; }}
-                                .summary {{ background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
-                                .footer {{ margin-top: 30px; font-size: 12px; color: #777; }}
+                                th {{ 
+                                    background-color: var(--mv-dark-blue); 
+                                    color: white; 
+                                    text-align: left; 
+                                    padding: 8px; 
+                                }}
+                                td {{ border: 1px solid var(--mv-border-color); padding: 8px; }}
+                                tr:nth-child(even) {{ background-color: var(--mv-light-gray); }}
+                                .summary {{ 
+                                    background-color: var(--mv-light-gray); 
+                                    padding: 15px; 
+                                    border-radius: 5px; 
+                                    margin-bottom: 20px; 
+                                }}
+                                .header {{
+                                    display: flex;
+                                    align-items: center;
+                                    margin-bottom: 20px;
+                                }}
+                                .logo {{
+                                    font-weight: bold;
+                                    font-size: 24px;
+                                    color: var(--mv-dark-blue);
+                                    margin-right: 10px;
+                                }}
+                                .footer {{ 
+                                    margin-top: 30px; 
+                                    font-size: 12px; 
+                                    color: #777; 
+                                    text-align: center;
+                                    padding-top: 20px;
+                                    border-top: 1px solid var(--mv-border-color);
+                                }}
+                                .highlight {{ color: var(--mv-highlight-green); }}
                             </style>
                         </head>
                         <body>
+                            <div class="header">
+                                <div class="logo">🕸️ <span>SpiderWeb</span> Cross-linker</div>
+                            </div>
+                            
                             <h1>Cross-linking Plan</h1>
                             <div class="summary">
                                 <h2>Summary</h2>
-                                <p>Total Links: {len(links_df)}</p>
-                                <p>Unique Source Pages: {links_df['source_page'].nunique()}</p>
-                                <p>Unique Target Pages: {links_df['target_page'].nunique()}</p>
-                                <p>Generated on: {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
+                                <p><strong>Total Links:</strong> {len(links_df)}</p>
+                                <p><strong>Unique Source Pages:</strong> {links_df['source_page'].nunique()}</p>
+                                <p><strong>Unique Target Pages:</strong> {links_df['target_page'].nunique()}</p>
+                                <p><strong>Generated on:</strong> {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
                             </div>
                             
                             <h2>Cross-linking Plan</h2>
@@ -978,7 +1272,7 @@ def main():
                             </table>
                             
                             <div class="footer">
-                                <p>Generated by MV Cross-linking Generator</p>
+                                <p>Generated by SpiderWeb Cross-linker &copy; 2025</p>
                             </div>
                         </body>
                         </html>
@@ -992,7 +1286,8 @@ def main():
                             "text/html",
                             key='download-html'
                         )
-# Implementation guide
+                    
+                    # Implementation guide
                     with st.expander("Implementation Guide"):
                         st.markdown("""
                         ### How to Implement This Cross-linking Plan
@@ -1050,8 +1345,7 @@ def main():
                 
                 else:
                     st.info("Please generate a cross-linking plan first in the 'Link Generation' tab.")
-            
-            # Add a URL Pattern Tester tool
+# Add a URL Pattern Tester tool
             with st.expander("URL Pattern Tester"):
                 st.write("Test your URL patterns against example URLs to verify categorization")
                 test_url = st.text_input("Enter a URL to test", placeholder="https://example.com/products/test-product")
@@ -1068,7 +1362,13 @@ def main():
                         st.warning("This URL didn't match any of your defined patterns.")
         else:
             # No data uploaded yet
-            st.info("Please upload or provide URL data in the 'Data Preparation' tab to get started.")
+            st.markdown("""
+            <div style="display: flex; justify-content: center; align-items: center; padding: 30px; flex-direction: column; text-align: center;">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwQTE5MjEiPjxwYXRoIGQ9Ik0xMiAwQzUuMzg1IDAgMCA1LjM4NSAwIDEyczUuMzg1IDEyIDEyIDEyIDEyLTUuMzg1IDEyLTEyUzE4LjYxNSAwIDEyIDB6bTEgMTdoLTJ2LTZoMnY2em0wLThoLTJ2LTJoMnYyeiIvPjwvc3ZnPg==" style="width: 64px; margin-bottom: 20px; opacity: 0.5;">
+                <h3 style="color: #0A1921; margin-bottom: 10px;">Welcome to SpiderWeb Cross-linker!</h3>
+                <p style="color: #555; margin-bottom: 20px;">Please upload or provide URL data in the sidebar to get started.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Example/placeholder content
             with st.expander("Example Data Format"):
@@ -1115,7 +1415,7 @@ def main():
                     <changefreq>monthly</changefreq>
                     <priority>0.8</priority>
                   </url>
-                  <url>
+<url>
                     <loc>https://example.com/page2</loc>
                     <lastmod>2023-01-15</lastmod>
                     <changefreq>weekly</changefreq>
@@ -1124,6 +1424,26 @@ def main():
                 </urlset>
                 ```
                 """)
+            
+            # Add feature highlights
+            st.markdown("""
+            ### Key Features
+            
+            * **Multi-source Input**: Upload CSV, XML sitemap URL, or manually enter URLs
+            * **Smart Categorization**: Auto-categorize pages based on URL patterns
+            * **Context-aware Anchor Text**: Generate varied and relevant anchor text
+            * **Placement Recommendations**: Get suggestions for optimal link placement
+            * **Export Options**: Download as CSV, Excel, or interactive HTML report
+            * **Bidirectional Link Balancing**: Automatically balance incoming and outgoing links
+            * **Title-based Anchor Text**: Fetch page titles for more natural links
+            """)
+            
+            # Add a footer
+            st.markdown("""
+            <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 12px; color: #555; border-top: 1px solid #ddd;">
+                SpiderWeb Cross-linker © 2025 | Powered by MediaVision
+            </div>
+            """, unsafe_allow_html=True)
     
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
