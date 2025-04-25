@@ -590,7 +590,7 @@ def main():
         if 'page' not in st.session_state:
             st.session_state.page = 'main'
         
-        st.title("🔗 MV Cross-linking Generator")
+        st.title("🔗 MV Octopus Cross-linker")
         
         st.markdown("""
         This app generates cross-linking recommendations for your website based on sitemap data.
