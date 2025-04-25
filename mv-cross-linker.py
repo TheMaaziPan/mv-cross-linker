@@ -30,7 +30,7 @@ except LookupError:
 
 # Set page configuration
 st.set_page_config(
-    page_title="MV Cross-linking Generator",
+    page_title="MV Octopus Cross-linker",
     page_icon="🔗",
     layout="wide",
     initial_sidebar_state="expanded"
